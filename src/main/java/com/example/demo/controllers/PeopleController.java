@@ -4,8 +4,11 @@ import com.example.demo.dao.PersonDAO;
 import com.example.demo.model.Person;
 import com.example.demo.payload.NewPersonPayload;
 import com.example.demo.payload.UpdatePersonPayload;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -23,16 +26,21 @@ public class PeopleController {
         return personDAO.findAll();
     }
     @GetMapping("/{id}")
-    public Person getPersonById(@PathVariable("id") int id){
+    public Person getPersonById(@PathVariable("id") int id) throws SQLException {
         return personDAO.findById(id);
     }
     @PostMapping
-    public Person createPerson(@RequestBody NewPersonPayload payload){
-        return personDAO.save(payload.name());
+    public void createPerson(@Valid @RequestBody NewPersonPayload payload, BindingResult bindingResult) throws Exception {
+        if (bindingResult.hasErrors()){
+            throw new Exception("Invalid data for creating new person");
+        }else {
+             personDAO.save(payload.name(), payload.age(), payload.email());
+        }
+
     }
     @PatchMapping("/{id}")
-    public Person update(@PathVariable("id") int id, @RequestBody UpdatePersonPayload payload){
-        return personDAO.update(new Person(id, payload.name()));
+    public Person update(@PathVariable("id") int id, @Valid @RequestBody UpdatePersonPayload payload) throws SQLException {
+        return personDAO.update(new Person(id, payload.name(), payload.age(), payload.email()));
 
     }
     @DeleteMapping("/{id}")
