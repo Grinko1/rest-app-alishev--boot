@@ -4,6 +4,7 @@ import com.example.demo.dao.PersonDAO;
 import com.example.demo.model.Person;
 import com.example.demo.payload.NewPersonPayload;
 import com.example.demo.payload.UpdatePersonPayload;
+import com.example.demo.util.PersonValidator;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +17,11 @@ import java.util.List;
 
 public class PeopleController {
     private final PersonDAO personDAO;
+    private final PersonValidator personValidator;
 
-    public PeopleController(PersonDAO personDAO) {
+    public PeopleController(PersonDAO personDAO, PersonValidator personValidator) {
         this.personDAO = personDAO;
+        this.personValidator = personValidator;
     }
 
     @GetMapping
@@ -29,19 +32,24 @@ public class PeopleController {
     public Person getPersonById(@PathVariable("id") int id) throws SQLException {
         return personDAO.findById(id);
     }
-    @PostMapping
-    public void createPerson(@Valid @RequestBody NewPersonPayload payload, BindingResult bindingResult) throws Exception {
-        if (bindingResult.hasErrors()){
-            throw new Exception("Invalid data for creating new person");
-        }else {
-             personDAO.save(payload.name(), payload.age(), payload.email());
-        }
 
+@PostMapping
+public void createPerson(@Valid @RequestBody Person person, BindingResult bindingResult) throws Exception {
+    System.out.println(person);
+    personValidator.validate(person, bindingResult);
+    if (bindingResult.hasErrors()){
+        throw new Exception("Invalid data for creating new person");
+    }else {
+        personDAO.save(person);
     }
+}
     @PatchMapping("/{id}")
-    public Person update(@PathVariable("id") int id, @Valid @RequestBody UpdatePersonPayload payload) throws SQLException {
-        return personDAO.update(new Person(id, payload.name(), payload.age(), payload.email()));
-
+    public Person update(@PathVariable("id") int id, @Valid @RequestBody Person person, BindingResult bindingResult) throws Exception {
+//        personValidator.validate(person,bindingResult);
+        if (bindingResult.hasErrors()){
+            throw new Exception("Invalid data for updating new person");
+        }
+        return personDAO.update(new Person(id, person.getName(), person.getAge(), person.getEmail(), person.getAddress()));
     }
     @DeleteMapping("/{id}")
     public String delete(@PathVariable("id") int id){

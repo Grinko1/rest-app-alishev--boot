@@ -10,15 +10,12 @@ import org.springframework.stereotype.Component;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class PersonDAO {
     private final JdbcTemplate jdbcTemplate;
-    private static Connection connection;
-
-
     @Autowired
-
     public PersonDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -29,15 +26,17 @@ public class PersonDAO {
 
     public Person findById(int id) {
         return jdbcTemplate.query("select * from person where id=?", new Object[]{id}, new BeanPropertyRowMapper<>(Person.class)).stream().findAny().orElse(null);
-
+    }
+    public Optional<Person> findByEmail(String email){
+        return jdbcTemplate.query("select * from person where email = ?", new Object[]{email}, new BeanPropertyRowMapper<>(Person.class)).stream().findAny();
     }
 
-    public void save(String name, int age, String email) {
-        jdbcTemplate.update("insert into person(name, age, email) values(?, ?, ?)", name, age, email);
-    }
 
+    public void save(Person person) {
+        jdbcTemplate.update("insert into person(name, age, email, address) values(?, ?, ?, ? )", person.getName(), person.getAge(), person.getEmail(), person.getAddress());
+    }
     public Person update(Person person) {
-        jdbcTemplate.update("update person set name=?, age=?, email=? WHERE id =?", person.getName(), person.getAge(), person.getEmail(), person.getId());
+        jdbcTemplate.update("update person set name=?, age=?, email=?, address=? WHERE id =?", person.getName(), person.getAge(), person.getEmail(), person.getAddress(), person.getId());
         return person;
     }
 
@@ -50,14 +49,20 @@ public class PersonDAO {
     //TEST BATCH UPDATE AND USUAL UPDATE/////
     /////////////////////////////////////////
     public void testMultipleUpdate() {
+        long start = System.currentTimeMillis();
         List<Person> people = create1000People();
         for (Person person : people) {
             jdbcTemplate.update("insert into person( name, age, email) values(?, ?, ?)", person.getName(), person.getAge(), person.getEmail());
         }
+        long end = System.currentTimeMillis();
+        System.out.println("without time: " + (end - start));
     }
 
     public void testBatchUpdate() {
+
+        long start = System.currentTimeMillis();
         List<Person> people = create1000People();
+
         jdbcTemplate.batchUpdate("insert into person( name, age, email) values(?, ?, ?)", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -71,13 +76,17 @@ public class PersonDAO {
                 return people.size();
             }
         });
+        long end = System.currentTimeMillis();
+        System.out.println("without time: " + (end - start));
     }
 
     private List<Person> create1000People() {
+
         List<Person> people = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            people.add(new Person(i, "name" + i, 30, "email" + i));
+            people.add(new Person(i, "name" + i, 30, "email" + i, "sdfsdf" + i));
         }
         return people;
+
     }
 }
