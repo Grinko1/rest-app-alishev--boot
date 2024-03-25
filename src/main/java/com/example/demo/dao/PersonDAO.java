@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -20,27 +21,40 @@ public class PersonDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Transactional(readOnly = true)
     public List<Person> findAll() {
-        return jdbcTemplate.query("select * from person", new BeanPropertyRowMapper<>(Person.class));
+//      List<Person> people =  session.createQuery("select p from Person p",Person.class).getResultList()
+        return jdbcTemplate.query("select p from Person p", new BeanPropertyRowMapper<>(Person.class));
     }
 
     public Person findById(int id) {
+        // session.get(Person.class, id)
         return jdbcTemplate.query("select * from person where id=?", new Object[]{id}, new BeanPropertyRowMapper<>(Person.class)).stream().findAny().orElse(null);
     }
     public Optional<Person> findByEmail(String email){
+        //session.createQuery("select * from Person where email = ?", email)
         return jdbcTemplate.query("select * from person where email = ?", new Object[]{email}, new BeanPropertyRowMapper<>(Person.class)).stream().findAny();
     }
 
 
     public void save(Person person) {
+        //session.persist(person)
         jdbcTemplate.update("insert into person(name, age, email, address) values(?, ?, ?, ? )", person.getName(), person.getAge(), person.getEmail(), person.getAddress());
     }
     public Person update(Person person) {
+//        Person toBeUpdated= session.get(Person.class, person.getId());
+//        toBeUpdated.setName(person.getName());
+//        toBeUpdated.setAge(person.getAge());
+//        toBeUpdated.setEmail(person.getEmail());
+//        toBeUpdated.setAddress(person.getAddress());
+
         jdbcTemplate.update("update person set name=?, age=?, email=?, address=? WHERE id =?", person.getName(), person.getAge(), person.getEmail(), person.getAddress(), person.getId());
         return person;
     }
 
     public void deleteById(int id) {
+        //Person person = findById(id)
+        //session.remove(person);
         jdbcTemplate.update("delete from person where id=?", id);
 
     }

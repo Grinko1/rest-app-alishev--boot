@@ -1,8 +1,15 @@
 package com.example.demo.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.*;
 
+@Entity
 public class Person {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Size(min = 2, max = 50, message = "Name should be between 2 and 50 characters")
     @NotEmpty(message = "Name should not be empty")
@@ -14,7 +21,7 @@ public class Person {
     @Email(message = "Email should be valid")
     private String email;
 
-    @Pattern(regexp = "[A-Z]\\w+, [A-Z]\\w+, \\d{6}",message = "Address is invalid")
+//    @Pattern(regexp = "[A-Z]\\w+, [A-Z]\\w+, \\d{6}",message = "Address is invalid")
     private String address;
 
     public Person(){}
@@ -64,5 +71,16 @@ public class Person {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", email='" + email + '\'' +
+                ", address='" + address + '\'' +
+                '}';
     }
 }

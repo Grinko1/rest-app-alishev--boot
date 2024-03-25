@@ -8,12 +8,14 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.Objects;
 
-@Configuration
-@PropertySource("classpath:application.properties")
+//@Configuration
+//@PropertySource("classpath:application.properties")
+//@EnableTransactionManagement
 public class AppConfig {
     private final Environment environment;
 
