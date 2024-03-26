@@ -1,10 +1,13 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+
+
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class Person {
@@ -20,17 +23,31 @@ public class Person {
     @NotEmpty(message = "Email shouldn't be empty")
     @Email(message = "Email should be valid")
     private String email;
-
-//    @Pattern(regexp = "[A-Z]\\w+, [A-Z]\\w+, \\d{6}",message = "Address is invalid")
     private String address;
+    @Column(name = "date_of_birth")
+    @Temporal(TemporalType.DATE)
+//    @DateTimeFormat(pattern = "dd/MM/yyyy") //day/month/year
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private Date dateBirth;
+    @Column(name = "created_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
+    @Enumerated
+    private Mood mood;
 
-    public Person(){}
+//    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+//    private List<Item> items;
+
+    public Person() {
+    }
+
     public Person(int id, String name, int age, String email, String address) {
         this.id = id;
         this.name = name;
         this.age = age;
         this.email = email;
         this.address = address;
+
     }
 
     public int getId() {
@@ -73,6 +90,51 @@ public class Person {
         this.address = address;
     }
 
+    public Date getDateBirth() {
+        return dateBirth;
+    }
+
+    public void setDateBirth(Date dateBirth) {
+        this.dateBirth = dateBirth;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+//        public List<Item> getItems() {
+//        return items;
+//    }
+//
+//    public void setItems(List<Item> items) {
+//        this.items = items;
+//    }
+
+
+    public Mood getMood() {
+        return mood;
+    }
+
+    public void setMood(Mood mood) {
+        this.mood = mood;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return id == person.id && age == person.age && Objects.equals(name, person.name) && Objects.equals(email, person.email) && Objects.equals(address, person.address) && Objects.equals(dateBirth, person.dateBirth) && Objects.equals(createdAt, person.createdAt) && mood == person.mood;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, age, email, address, dateBirth, createdAt, mood);
+    }
+
     @Override
     public String toString() {
         return "Person{" +
@@ -81,6 +143,9 @@ public class Person {
                 ", age=" + age +
                 ", email='" + email + '\'' +
                 ", address='" + address + '\'' +
+                ", dateBirth=" + dateBirth +
+                ", createdAt=" + createdAt +
+                ", mood=" + mood +
                 '}';
     }
 }
